@@ -1,5 +1,6 @@
 using Estate.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
+
 using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
