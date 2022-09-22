@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Contracts;
 using Entities.Exceptions;
+using Entities.Models;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Service.Contracts;
 using Shared.DataTransferObject;
+using Shared.DataTransferObjects;
 
 namespace Service
 {
@@ -18,6 +20,18 @@ namespace Service
             _repositoryManager = repositoryManager;
             _loggerManager = loggerManager;
             _mapper = mapper;
+        }
+
+        public CompanyDto CreateCompany(CompanyForCreationDto company)
+        {
+            var companyEnity = _mapper.Map<Company>(company);
+
+            _repositoryManager.Company.CreateCompany(companyEnity);
+            _repositoryManager.Save();
+
+            var companyForReturn = _mapper.Map<CompanyDto>(companyEnity);
+
+            return companyForReturn;
         }
 
         public IEnumerable<CompanyDto> GetAllCompanies(bool trackChanges)
