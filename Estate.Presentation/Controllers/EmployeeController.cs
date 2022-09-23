@@ -19,14 +19,13 @@ namespace Estate.Presentation.Controllers
         [HttpGet]
         public IActionResult GetEmployeesForCompany(Guid companyId)
         {
-            var employees = _service.EmployeeService.getEmployees(companyId,trackChanges:false);
+            var employees = _service.EmployeeService.getEmployees(companyId, trackChanges: false);
 
             return Ok(employees);
         }
 
-        [HttpGet("{id:guid}",Name = "GetEmployeeForCompany")]
-
-        public IActionResult GetEmployeeForCompany(Guid companyId,Guid id)
+        [HttpGet("{id:guid}", Name = "GetEmployeeForCompany")]
+        public IActionResult GetEmployeeForCompany(Guid companyId, Guid id)
         {
             var employee = _service.EmployeeService.GetEmployee(companyId, id, trackChanges: false);
 
@@ -48,11 +47,29 @@ namespace Estate.Presentation.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        public IActionResult DeleteEmployeeForCompany(Guid companyId,Guid id)
+        public IActionResult DeleteEmployeeForCompany(Guid companyId, Guid id)
         {
-            _service.EmployeeService.DeleteEmployeeForCompany(companyId,id,trackChanges:false);
+            _service.EmployeeService.DeleteEmployeeForCompany(companyId, id, trackChanges: false);
 
             return NoContent();
         }
+
+        [HttpPut("{id:guid}")]
+        public IActionResult UpdateEmployeeForCompany(Guid companyId, Guid id,
+            [FromBody] EmployeeForUpdateDto employeeForUpdate)
+        {
+            if (employeeForUpdate is null)
+                return BadRequest("Employee object is null");
+
+            _service.EmployeeService.UpdateEmployeeForCompany(companyId,
+                id,
+                employeeForUpdate,
+                compTrackChanges: false,
+                empTrackChanges: true);
+
+            return NoContent();
+        }
+
+
     }
 }

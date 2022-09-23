@@ -67,5 +67,17 @@ namespace Estate.Presentation.Controllers
 
             return NoContent();
         }
+
+        [HttpPut("{id:guid}")]
+
+        public IActionResult UpdateCompany(Guid id, [FromBody] CompanyForUpdateDto companyForUpdate)
+        {
+            if (companyForUpdate is null)
+                return BadRequest("CompanyForUpdateDto object is null");
+
+            _service.CompanyService.UpdateCompany(id,companyForUpdate,trackChanges:true);
+
+            return NoContent();
+        }
     }
 }
