@@ -10,7 +10,7 @@ namespace Estate
         public MappingProfile()
         {
             CreateMap<Company, CompanyDto>()
-                .ForCtorParam("FullAddress",
+                .ForMember(c=>c.FullAddress,
                 opt => opt.MapFrom(x => string.Join(' ', x.Address, x.Country)));
 
             CreateMap<Employee, EmployeeDto>();
@@ -18,8 +18,7 @@ namespace Estate
             CreateMap<CompanyForCreationDto, Company>();
             CreateMap<CompanyForUpdateDto, Company>();
 
-            CreateMap<EmployeeForCreationDto, Employee>();
-            CreateMap<EmployeeForUpdateDto, Employee>();
+            CreateMap<EmployeeForUpdateDto, Employee>().ReverseMap();
         }
     }
 }

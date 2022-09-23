@@ -1,13 +1,22 @@
 using Contracts;
 using Estate.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
-
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
 using NLog;
-using System.ComponentModel.DataAnnotations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
+{
+    return new ServiceCollection().AddLogging().AddMvc().AddNewtonsoftJson()
+    .Services.BuildServiceProvider()
+    .GetRequiredService<IOptions<MvcOptions>>().Value.InputFormatters
+    .OfType<NewtonsoftJsonPatchInputFormatter>().First();
+}
 
 LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
@@ -20,9 +29,14 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 
 
 builder.Services.AddAutoMapper(typeof(Program));
-
-builder.Services.AddControllers()
-    .AddApplicationPart(typeof(Estate.Presentation.AssemblyReference).Assembly);
+    
+builder.Services.AddControllers(confing =>
+{
+    confing.RespectBrowserAcceptHeader= true;
+    confing.ReturnHttpNotAcceptable = true;
+    confing.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+}).AddXmlDataContractSerializerFormatters()
+  .AddApplicationPart(typeof(Estate.Presentation.AssemblyReference).Assembly);
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Shared.DataTransferObjects;
 using System.Text.RegularExpressions;
@@ -66,6 +67,23 @@ namespace Estate.Presentation.Controllers
                 employeeForUpdate,
                 compTrackChanges: false,
                 empTrackChanges: true);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}")]
+        public IActionResult PartiallyUpdateEmployeeForCompany(Guid companyId,Guid id,
+            [FromBody] JsonPatchDocument<EmployeeForUpdateDto> patchDoc)
+        {
+            if (patchDoc is null)
+                return BadRequest("PachDoc object sent from client is null");
+
+            var (employeeToPatch, empoyeeEntity) = _service.EmployeeService.GetEmployeeForPatch(
+                companyId, id, compTrackChanges: false, empTrackChanges: true);
+
+            patchDoc.ApplyTo(employeeToPatch);
+
+            _service.EmployeeService.SaveChangesForPatch(employeeToPatch, empoyeeEntity);
 
             return NoContent();
         }
