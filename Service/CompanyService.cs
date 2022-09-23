@@ -22,6 +22,7 @@ namespace Service
             _mapper = mapper;
         }
 
+
         public CompanyDto CreateCompany(CompanyForCreationDto company)
         {
             var companyEnity = _mapper.Map<Company>(company);
@@ -53,6 +54,49 @@ namespace Service
             var companyDto =_mapper.Map<CompanyDto>(company);
 
             return companyDto;
+        }
+
+        public IEnumerable<CompanyDto> GetByIds(IEnumerable<Guid> ids, bool trackChanges)
+        {
+            if (ids is null)
+                throw new IdParametersBadRequestException();
+
+            var companyEntities = _repositoryManager.Company.GetByIds(ids, trackChanges);
+            if (ids.Count() != companyEntities.Count())
+                throw new CollectionByIdsBadRequestException();
+
+            var companiesForReturn = _mapper.Map<IEnumerable<CompanyDto>>(companyEntities);
+
+            return companiesForReturn;
+        }
+
+        public (IEnumerable<CompanyDto> companies, string ids) CreateCompanyCollection(IEnumerable<CompanyForCreationDto> companyCollection)
+        {
+            if (companyCollection is null)
+                throw new CompanyCollectionBadRequestException();
+
+            var companyEntities = _mapper.Map<IEnumerable<Company>>(companyCollection);
+
+            foreach (var company in companyEntities)
+            {
+                _repositoryManager.Company.CreateCompany(company);
+            }
+            _repositoryManager.Save();
+
+            var companiesForReturn = _mapper.Map<IEnumerable<CompanyDto>>(companyEntities);
+            var ids = string.Join(",", companiesForReturn.Select(c => c.Id));
+
+            return (companies:companiesForReturn, ids);
+        }
+
+        public void DeleteCompany(Guid companyId, bool trackChanges)
+        {
+            var company = _repositoryManager.Company.GetCompany(companyId,trackChanges);
+            if (company is null)
+                throw new CompanyNotFoundException(companyId);
+
+            _repositoryManager.Company.DeleteCompany(company);
+            _repositoryManager.Save();
         }
     }
 }
